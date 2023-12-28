@@ -1,0 +1,11 @@
+name: YoggiesSMP
+version: '1.0-SNAPSHOT'
+main: shwendel.yoggiessmp.YoggiesSMP
+api-version: 1.20
+commands:
+  setshrine:
+    description: Set the shrine location
+  setspawn:
+    description: Set the spawn location
+  test:
+    description: Testing command
