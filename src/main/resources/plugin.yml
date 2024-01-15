@@ -9,3 +9,9 @@ commands:
     description: Set the spawn location
   test:
     description: Testing command
+  fragments:
+    aliases: [ fragment ]
+    description: Salvage items for Yoggies Fragments
+  giveenchantment:
+    aliases: [ giveenchant ]
+    description: Give an enchantment to a player

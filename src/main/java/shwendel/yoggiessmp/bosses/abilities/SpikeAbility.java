@@ -3,15 +3,14 @@ package shwendel.yoggiessmp.bosses.abilities;
 import org.bukkit.*;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.BlockDisplay;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Transformation;
-import org.checkerframework.checker.units.qual.A;
+import org.bukkit.util.Vector;
 import shwendel.yoggiessmp.YoggiesSMP;
 import shwendel.yoggiessmp.bosses.Ability;
 
-import javax.xml.crypto.dsig.Transform;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -22,15 +21,17 @@ public class SpikeAbility extends Ability {
 
     private static final int HEIGHT = 10;
     private static final int RADIUS = 2; // Square
-    private static final int RADIUS_INTERVAL = 4; // Amount of loops between each radius
+    private static final int RADIUS_INTERVAL = 2; // Amount of loops between each radius
     private static final int SPEED = 1; // Ticks between intervals
     private static final double HEIGHT_INCREASE = 1; // Height increase of spike per speed tick
-    private static final double MAX_HEIGHT_DIFFERENCE = 12; // If difference between current height and starting height >= this value, stop the spike
+    private static final int WARNING_TIMER = 10; // Ticks between warnings
     private static final Material[] WARNING_MATERIALS = new Material[] { // Also used as seconds, 3 materials = 3 seconds
             Material.LIME_CONCRETE,
             Material.YELLOW_CONCRETE,
             Material.RED_CONCRETE
     };
+    private static final int DESPAWN_TIMER = 10; // In ticks
+    private static final Vector FLING_VECTOR = new Vector(0, 2.25, 0); // Tossed upwards
 
     private BlockData blockData;
 
@@ -102,6 +103,28 @@ public class SpikeAbility extends Ability {
                         public void run() {
 
                             if(heightCounter >= HEIGHT) {
+
+                                new BukkitRunnable() {
+
+                                    @Override
+                                    public void run() {
+
+                                        for(BlockDisplay block : blocks) {
+                                            block.remove();
+                                        }
+
+                                    }
+
+                                }.runTaskLater(instance, DESPAWN_TIMER);
+
+                                for(Location warning : warningLocations) {
+
+                                    for(Player player : Bukkit.getOnlinePlayers()) {
+                                        player.sendBlockChange(warning, Material.AIR.createBlockData());
+                                    }
+
+                                }
+
                                 cancel();
                             }
 
@@ -116,6 +139,19 @@ public class SpikeAbility extends Ability {
                         }
 
                     }.runTaskTimer(instance, 0, SPEED);
+
+                    for(Entity entity : world.getNearbyEntities(location, RADIUS + 0.5, HEIGHT + 0.5, RADIUS + 0.5)) {
+
+                        if(!(entity instanceof Player)) {
+                            continue;
+                        }
+
+                        Player player = (Player) entity;
+
+                        player.damage(5);
+                        player.setVelocity(FLING_VECTOR);
+
+                    }
 
                     cancel();
                     return;
@@ -135,7 +171,7 @@ public class SpikeAbility extends Ability {
 
             }
 
-        }.runTaskTimer(instance, 0, 20);
+        }.runTaskTimer(instance, 0, WARNING_TIMER);
 
     }
 

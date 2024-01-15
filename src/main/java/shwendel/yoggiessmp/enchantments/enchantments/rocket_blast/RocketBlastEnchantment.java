@@ -1,5 +1,6 @@
 package shwendel.yoggiessmp.enchantments.enchantments.rocket_blast;
 
+import org.bukkit.inventory.ItemStack;
 import shwendel.yoggiessmp.enchantments.YoggiesEnchantment;
 
 public class RocketBlastEnchantment extends YoggiesEnchantment {
@@ -22,6 +23,16 @@ public class RocketBlastEnchantment extends YoggiesEnchantment {
     @Override
     public double getValue(int level) {
         return level;
+    }
+
+    @Override
+    public void onApply(ItemStack item, int level) {
+
+    }
+
+    @Override
+    public boolean hasLore() {
+        return true;
     }
 
 }

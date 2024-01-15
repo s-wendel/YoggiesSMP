@@ -1,12 +1,10 @@
 package shwendel.yoggiessmp.bosses;
 
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import shwendel.yoggiessmp.bosses.abilities.ShockwaveAbility;
-import shwendel.yoggiessmp.bosses.abilities.SpikeAbility;
+import shwendel.yoggiessmp.bosses.bosses.TheGreenBoss;
 
 public class BossTestCommand implements CommandExecutor {
 
@@ -14,7 +12,11 @@ public class BossTestCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String string, String[] args) {
 
-        new SpikeAbility(Material.SLIME_BLOCK).run(((Player) sender).getTargetBlock(null, 10).getLocation());
+        Player player = (Player) sender;
+
+        BossMemory bossMemory = new BossMemory(new TheGreenBoss());
+
+        bossMemory.spawn(player.getLocation());
 
         return true;
     }

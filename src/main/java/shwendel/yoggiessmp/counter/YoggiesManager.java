@@ -17,6 +17,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import shwendel.yoggiessmp.YoggiesSMP;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class YoggiesManager {
 
     public static final Material YOGGIES_FRAGMENT_MATERIAL = Material.PRISMARINE_SHARD;
@@ -29,7 +32,7 @@ public class YoggiesManager {
     public static Location shrineLocation;
     public static BossBar bossBar;
 
-    private static final int MAX_COUNTER = 50;
+    private static final Map<Integer, String> INTERVALS = new HashMap<>();
     private static final YoggiesSMP INSTANCE = YoggiesSMP.getInstance();
     private static FileConfiguration config = INSTANCE.getConfig();
 
@@ -40,7 +43,19 @@ public class YoggiesManager {
     private static final int FIREWORKS_RANGE = 50;
     private static final int FIREWORK_INTERVALS = 10;
 
+
     static {
+
+        // Counter intervals
+        INTERVALS.put(-500, "Yoggies Fragments take 1.5x the materials.");
+        INTERVALS.put(-250, "The Yoggies has disabled Rocket Blast.");
+        INTERVALS.put(-125, "The Yoggies has disabled Smelting Touch.");
+        INTERVALS.put(-50, "The Yoggies has disabled Drill.");
+        INTERVALS.put(0, "Yoggies Fragments take 1x the materials.");
+        INTERVALS.put(50, "Yoggies Fragments take 0.9x the materials.");
+        INTERVALS.put(125, "Every sunrise, Yoggies blesses the lands with a gift.");
+        INTERVALS.put(250, "Yoggies has improved his gifts.");
+        INTERVALS.put(500, "Yoggies Fragments take 0.75x the materials.");
 
         counter = config.getInt(COUNTER_SECTION);
         stage = config.getInt(STAGE_SECTION);
@@ -65,7 +80,7 @@ public class YoggiesManager {
 
     private static void updateBossBar() {
 
-        String color = "";
+        /**String color = "";
         String emotion = "";
 
         if(counter >= MAX_COUNTER * 2 / 3) {
@@ -84,7 +99,20 @@ public class YoggiesManager {
 
         bossBar.setTitle(chatColor + "Counter ➔ " + counter + " " + emotion);
         bossBar.setColor(barColor);
-        bossBar.setProgress((double) counter / MAX_COUNTER);
+
+        double progress = (double) counter / MAX_COUNTER;
+
+        if(progress <= 0) {
+
+            progress = 0;
+
+        } else if(progress >= 1) {
+
+            progress = 1;
+
+        }
+
+        bossBar.setProgress(progress);*/
 
     }
 
@@ -102,14 +130,7 @@ public class YoggiesManager {
             return;
         }
 
-        int newAmount = counter + amount;
-
-        if(newAmount >= MAX_COUNTER) {
-            newAmount = 0;
-            addStage();
-        }
-
-        counter = newAmount;
+        counter += amount;
 
         playSound(Sound.ITEM_GOAT_HORN_SOUND_1, 1.5f, 0.5f);
         updateBossBar();
@@ -122,17 +143,7 @@ public class YoggiesManager {
             return;
         }
 
-        int newAmount = counter - amount;
-
-        if(newAmount <= 0) {
-
-            counter = 0;
-
-        } else {
-
-            counter = newAmount;
-
-        }
+        counter -= amount;
 
         playSound(Sound.ENTITY_RAVAGER_AMBIENT, 1.5f, 1f);
         updateBossBar();
@@ -210,12 +221,7 @@ public class YoggiesManager {
 
             final ItemStack DEFAULT = new ItemStack(Material.COPPER_BLOCK);
 
-            final ItemStack MAIN = new ItemStack(YOGGIES_FRAGMENT_MATERIAL);
-
-            ItemMeta mainMeta = MAIN.getItemMeta();
-            mainMeta.setDisplayName(YOGGIES_FRAGMENT_NAME);
-
-            MAIN.setItemMeta(mainMeta);
+            final ItemStack MAIN = getYoggiesFragment();
 
             switch(i) {
 
@@ -245,6 +251,18 @@ public class YoggiesManager {
 
     public static boolean inShrineRange(Location location) {
         return Math.abs(location.getBlockX()) - shrineLocation.getBlockX() <= SHRINE_RANGE && Math.abs(location.getBlockZ()) - shrineLocation.getBlockZ() <= SHRINE_RANGE;
+    }
+
+    public static ItemStack getYoggiesFragment() {
+
+        ItemStack item = new ItemStack(YOGGIES_FRAGMENT_MATERIAL);
+
+        ItemMeta itemMeta = item.getItemMeta();
+        itemMeta.setDisplayName(YOGGIES_FRAGMENT_NAME);
+
+        item.setItemMeta(itemMeta);
+
+        return item;
     }
 
 }

@@ -6,15 +6,23 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import shwendel.yoggiessmp.counter.YoggiesManager;
 import shwendel.yoggiessmp.enchantments.YoggiesEnchantment;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+
 public class DrillEnchantmentListener implements Listener {
 
-    @EventHandler
+    private static ThreadLocalRandom random = ThreadLocalRandom.current();
+    private static final int RANGE = 1; // Radius of the cube
+
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void mineBlock(BlockBreakEvent event) {
 
         Location location = event.getBlock().getLocation();
@@ -27,7 +35,7 @@ public class DrillEnchantmentListener implements Listener {
         Player player = event.getPlayer();
         ItemStack item = player.getInventory().getItemInMainHand();
 
-        if(item == null || item.getType() == Material.AIR || !player.isSneaking()) {
+        if(item == null || item.getType() == Material.AIR) {
             return;
         }
 
@@ -44,16 +52,24 @@ public class DrillEnchantmentListener implements Listener {
         int locationY = location.getBlockY();
         int locationZ = location.getBlockZ();
 
-        for(int x = locationX - drillValue; x <= locationX + drillValue; x++) {
+        double number = random.nextDouble(100);
 
-            for(int y = locationY - drillValue; y <= locationY + drillValue; y++) {
+        List<Block> blocks = new ArrayList<>();
 
-                for(int z = locationZ - drillValue; z <= locationZ + drillValue; z++) {
+        if(number <= drillValue) {
 
-                    Block block = world.getBlockAt(x, y, z);
+            for(int x = locationX - RANGE; x <= locationX + RANGE; x++) {
 
-                    if(block.getType() != Material.BEDROCK) {
-                        block.breakNaturally(item);
+                for(int y = locationY - RANGE; y <= locationY + RANGE; y++) {
+
+                    for(int z = locationZ - RANGE; z <= locationZ + RANGE; z++) {
+
+                        Block block = world.getBlockAt(x, y, z);
+
+                        if(block.getType() != Material.BEDROCK) {
+                            blocks.add(block);
+                        }
+
                     }
 
                 }
@@ -61,6 +77,8 @@ public class DrillEnchantmentListener implements Listener {
             }
 
         }
+
+        YoggiesEnchantment.mineBlocks(blocks, item);
 
     }
 

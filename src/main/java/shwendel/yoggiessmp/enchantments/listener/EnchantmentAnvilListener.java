@@ -58,6 +58,8 @@ public class EnchantmentAnvilListener implements Listener {
 
             result = YoggiesEnchantment.setEnchantmentLevel(first, enchantment, newLevel);
 
+            enchantment.onApply(result, newLevel);
+
         }
 
         if(result != null) {

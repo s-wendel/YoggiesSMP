@@ -16,7 +16,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class ShrineDropListener implements Listener {
 
-    private static ThreadLocalRandom random = ThreadLocalRandom.current();
+    /**private static ThreadLocalRandom random = ThreadLocalRandom.current();
 
     @EventHandler
     public void dropItem(PlayerDropItemEvent event) {
@@ -89,6 +89,6 @@ public class ShrineDropListener implements Listener {
 
         }
 
-    }
+    }*/
 
 }

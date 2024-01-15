@@ -27,7 +27,7 @@ public class YoggiesKillListener implements Listener {
             return;
         }
 
-        YoggiesManager.removeCounter(1);
+        YoggiesManager.removeCounter(5);
 
     }
 

@@ -1,14 +1,14 @@
 package shwendel.yoggiessmp.enchantments;
 
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
+import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.reflections.Reflections;
 import shwendel.yoggiessmp.YoggiesSMP;
 import shwendel.yoggiessmp.util.RomanNumeral;
+import shwendel.yoggiessmp.util.SmeltingUtil;
 
 import java.util.*;
 
@@ -56,6 +56,19 @@ public abstract class YoggiesEnchantment {
      */
     public abstract double getValue(int level);
 
+    /**
+     * Called when an Enchantment is applied to an item, could be used to add vanilla Enchantments
+     * @param item The item
+     * @param level The level
+     */
+    public abstract void onApply(ItemStack item, int level);
+
+    /**
+     * Returns if the item adds lore
+     * @return If the item adds lore
+     */
+    public abstract boolean hasLore();
+
     public static ItemStack setEnchantmentLevel(ItemStack item, YoggiesEnchantment enchantment, int level) {
 
         ItemStack newItem = item.clone();
@@ -64,35 +77,39 @@ public abstract class YoggiesEnchantment {
 
         itemMeta.getPersistentDataContainer().set(getNamespacedKey(enchantment), PersistentDataType.INTEGER, level);
 
-        String enchantmentName = enchantment.getName();
-        String enchantmentLine = getEnchantmentLine(enchantment, level);
+        if(item.getType() == Material.ENCHANTED_BOOK || enchantment.hasLore()) {
 
-        if(itemMeta.hasLore()) {
+            String enchantmentName = enchantment.getName();
+            String enchantmentLine = getEnchantmentLine(enchantment, level);
 
-            int index = 0;
-            List<String> lore = itemMeta.getLore();
-            boolean appliedEnchantment = false;
+            if(itemMeta.hasLore()) {
 
-            while(index < lore.size() && !appliedEnchantment) {
+                int index = 0;
+                List<String> lore = itemMeta.getLore();
+                boolean appliedEnchantment = false;
 
-                if(lore.get(index).contains(enchantmentName)) {
-                    lore.set(index, enchantmentLine);
-                    appliedEnchantment = true;
+                while(index < lore.size() && !appliedEnchantment) {
+
+                    if(lore.get(index).contains(enchantmentName)) {
+                        lore.set(index, enchantmentLine);
+                        appliedEnchantment = true;
+                    }
+
+                    index++;
+
                 }
 
-                index++;
+                if(!appliedEnchantment) {
+                    lore.add(enchantmentLine);
+                }
+
+                itemMeta.setLore(lore);
+
+            } else {
+
+                itemMeta.setLore(Arrays.asList(enchantmentLine));
 
             }
-
-            if(!appliedEnchantment) {
-                lore.add(enchantmentLine);
-            }
-
-            itemMeta.setLore(lore);
-
-        } else {
-
-            itemMeta.setLore(Arrays.asList(enchantmentLine));
 
         }
 
@@ -111,6 +128,55 @@ public abstract class YoggiesEnchantment {
 
     private static String getEnchantmentLine(YoggiesEnchantment enchantment, int level) {
         return ChatColor.GRAY + enchantment.getName() + " " + RomanNumeral.toRoman(level);
+    }
+
+    public static void mineBlocks(List<Block> blocks, ItemStack item) {
+
+        YoggiesEnchantment smeltingTouch = YoggiesEnchantment.ENCHANTMENTS.get("Smelting Touch");
+        int smeltingTouchLevel = YoggiesEnchantment.getEnchantmentLevel(item, smeltingTouch);
+        boolean hasSmeltingTouch = smeltingTouchLevel > 0;
+
+        for(Block block : blocks) {
+
+            Location location = block.getLocation();
+            World world = location.getWorld();
+
+            Collection<ItemStack> drops = block.getDrops(item);
+
+            boolean noSmeltingRecipe = true;
+
+            for(ItemStack drop : drops) {
+
+                if(hasSmeltingTouch) {
+
+                    ItemStack smeltedDrop = SmeltingUtil.getSmeltedItem(drop);
+
+                    if(smeltedDrop != null) {
+
+                        noSmeltingRecipe = false;
+
+                        smeltedDrop.setAmount(drop.getAmount());
+
+                        world.dropItemNaturally(location, smeltedDrop);
+
+                    }
+
+                }
+
+            }
+
+            if(!noSmeltingRecipe && hasSmeltingTouch) {
+
+                block.setType(Material.AIR);
+
+            } else {
+
+                block.breakNaturally(item);
+
+            }
+
+        }
+
     }
 
     public ItemStack getItem(int level) {
