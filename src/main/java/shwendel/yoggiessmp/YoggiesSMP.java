@@ -48,7 +48,7 @@ public final class YoggiesSMP extends JavaPlugin {
 
         getCommand("setshrine").setExecutor(new SetShrineCommand());
         getCommand("setspawn").setExecutor(new SetSpawnCommand());
-        //getCommand("test").setExecutor(new BossTestCommand());
+        getCommand("test").setExecutor(new BossTestCommand());
         getCommand("fragments").setExecutor(new FragmentsCommand());
         getCommand("giveenchantment").setExecutor(new GiveEnchantmentCommand());
 
